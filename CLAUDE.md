@@ -1,6 +1,6 @@
 # omniplugin — agent instructions
 
-This repo is a **playbook**, not a codebase: distilled guidance for building and maintaining omni-platform agent plugins (one repo, one shared core, native installs on many agentic platforms). The reference implementation behind every claim is https://github.com/nagisanzenin/engram — when this playbook and reality disagree, check engram's current main, then fix the playbook.
+This repo is a **playbook that ships as a plugin**: distilled guidance for building and maintaining omni-platform agent plugins, plus `skills/omniplugin/SKILL.md` (the installable router — Claude Code / Codex / Antigravity manifests are in `.claude-plugin/`, `.codex-plugin/`, root `plugin.json`; one repo, one shared core, native installs on many agentic platforms). The reference implementation behind every claim is https://github.com/nagisanzenin/engram — when this playbook and reality disagree, check engram's current main, then fix the playbook.
 
 ## Route by task
 

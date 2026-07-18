@@ -33,6 +33,20 @@ This playbook is that pattern, extracted from a plugin that actually shipped it:
 
 Working with an agent? Point it at [CLAUDE.md](CLAUDE.md) — it routes by task.
 
+## Install it — yes, as a plugin
+
+A playbook about omni-platform plugins had better be one. The repo ships [`skills/omniplugin/SKILL.md`](skills/omniplugin/SKILL.md): install it and your agent consults the playbook on its own whenever multi-platform plugin work comes up (creating, porting, reviewing a port PR, releasing).
+
+| Platform | Install |
+|---|---|
+| **Claude Code** | `claude plugin marketplace add nagisanzenin/omniplugin` then `claude plugin install omniplugin@omniplugin` |
+| **OpenAI Codex** | `codex plugin marketplace add nagisanzenin/omniplugin` then `codex plugin add omniplugin@omniplugin` |
+| **Antigravity** | `agy plugin install https://github.com/nagisanzenin/omniplugin` |
+| **Hermes Agent** | `git clone https://github.com/nagisanzenin/omniplugin ~/omniplugin`, then add `~/omniplugin/skills` to `skills.external_dirs` in `~/.hermes/config.yaml` — **clone, not the hub installer** (the skill Reads `docs/`, which referenced-files-only staging would sever — [rule R8](docs/02-portability-rules.md)) |
+| **Anything else that reads `SKILL.md`** | clone the repo and point the platform at `skills/` — the whole repo must come along, because the skill routes into `docs/` |
+
+Honest status, per the playbook's own rule: **none of these routes is verified live in this repo yet.** The Claude Code layout is the pattern engram ships and runs daily; the Codex manifests mirror engram's (which shipped without a live-binary check and degrade harmlessly); the Antigravity manifest is exactly the format its own schema and the engram PR #8 review established. The skill is plain markdown routing to plain markdown — the worst failure mode is a skill that doesn't register. Install it and tell me what you see; the doc upgrades when you do. Dogfooding receipts: the namespace-bleed check for the new root paths (`skills/`, `plugin.json`, `.agents/`) is [rule R9](docs/02-portability-rules.md) applied to this very repo, and version `0.1.0` moves in lockstep across both manifests per [04 · Maintenance](docs/04-maintenance.md).
+
 ## The case study in one table
 
 engram v1.0.5, 2026-07-18 — what "one core, five platforms" concretely costs and buys:

@@ -1,0 +1,14 @@
+{
+  "name": "omniplugin",
+  "description": "Playbook for omni-platform agent plugins — one repo, one core, native installs everywhere.",
+  "owner": {
+    "name": "Quan Duong"
+  },
+  "plugins": [
+    {
+      "name": "omniplugin",
+      "source": "./",
+      "description": "Installable playbook: your agent consults the anatomy, portability rules, platform checklist, crib sheets, and templates whenever multi-platform plugin work comes up."
+    }
+  ]
+}

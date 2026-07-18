@@ -1,0 +1,5 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "omniplugin",
+  "description": "The omni-platform plugin playbook, installable: your agent consults the doctrine, checklists, and per-platform crib sheets whenever multi-platform plugin work comes up."
+}
