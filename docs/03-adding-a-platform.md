@@ -1,6 +1,6 @@
 # 03 · Adding a platform — the checklist
 
-The recurring operation. Engram ran this loop four times (Codex, OpenCode, Hermes, Antigravity); each run below is annotated with what that pass taught. Work the phases in order — every shortcut here has already failed once.
+The recurring operation. Engram ran this loop five times (Codex, OpenCode, Hermes, Antigravity, OpenClaw); each run below is annotated with what that pass taught. Work the phases in order — every shortcut here has already failed once.
 
 ---
 
@@ -18,7 +18,7 @@ If nobody asked yet: the port still might be worth it for reach, but downgrade t
 2. **The CLI/app changelog** — loader behavior often lives only there (AG's *"skill-derived slash commands"*, *"copy the entire plugin directory"* were changelog lines, not docs).
 3. **A flagship plugin as reference implementation** — find the most serious existing plugin for the platform and read its layout. What it *doesn't* ship is as informative as what it does (the flagship AG plugin ships no `commands/` — because nothing reads one).
 
-### The intake questions (answer all 12 in writing — [template](../templates/platform-intake.md))
+### The intake questions (answer all 15 in writing — [template](../templates/platform-intake.md))
 
 1. **Manifest**: required file, schema, which fields are real vs tolerated?
 2. **Discovery model**: manifest-mapped, or directory convention? Which root paths are scanned?
@@ -32,6 +32,9 @@ If nobody asked yet: the port still might be worth it for reach, but downgrade t
 10. **Namespace collisions**: do any of your command/skill names collide with platform built-ins? What does the platform do on collision? (`/learn` is Hermes' flagship built-in.)
 11. **Headless vs interactive**: do slash commands work in non-interactive mode? (Hermes `chat -q` passes them through as literal text — document how *not* to test.)
 12. **Version field**: does the platform manifest want a version? If yes, it becomes a new location in your release-grep ([04 · Maintenance](04-maintenance.md)) — or, if the schema doesn't require it, deliberately omit it to avoid a drift location.
+13. **Does it read another platform's manifest?** ⚠ NEW. Some loaders accept foreign formats as "bundles" — OpenClaw reads Codex, Claude, and Cursor layouts. If yes: **which one wins when you ship several**, and does the answer come from the docs or from the code? (OpenClaw's docs say a native manifest wins; its code checks the Codex marker first. Pitfall 12.) Then re-read every key in that borrowed manifest for a *different meaning on this platform* — `hooks` is a file path to Codex and a directory list to OpenClaw, which silently loaded nothing (pitfall 13).
+14. **Is the capability globally gated?** ⚠ NEW. Ask, per capability you contribute, whether the host requires a separate opt-in before it runs anything. OpenClaw skips internal hook discovery entirely until `hooks.internal.enabled` is set — and until then the hook lists as `✓ ready` and never fires. Find the gate during research, and it becomes an install *step*; find it later, and it was a week of "why is nothing happening" (pitfall 15).
+15. **What does the diagnostic actually prove?** ⚠ NEW. Identify, before you trust it, whether the platform's `list`/`inspect`/`status` output reflects the **running system** or merely your manifest. OpenClaw reported `hooks` as a live capability the entire time it was loading zero of them. Find the log line that proves registration, and make that your check (pitfall 14).
 
 Save what you learn — dated, with URLs — into a per-platform crib sheet ([docs/platforms/](platforms/)).
 
@@ -82,5 +85,5 @@ A platform addition is a release like any other — it runs the full [release pr
 ## Phase 6 · Keep it alive
 
 - Watch the platform's changelog; loaders change fast (pin what version your research was done against — every crib sheet here carries its date).
-- External contributors will send ports. Welcome them — two of engram's five platforms were contributed — but **re-run Phase 1 yourself before merging**. The review that matters is against the platform's actual loader, not against the diff's internal quality. Requesting changes that *remove* work is normal (the AG PR shrank to ~7 lines under review).
+- External contributors will send ports. Welcome them — two of engram's six platforms were contributed — but **re-run Phase 1 yourself before merging**. The review that matters is against the platform's actual loader, not against the diff's internal quality. Requesting changes that *remove* work is normal (the AG PR shrank to ~7 lines under review).
 - When a port's unverified paths get exercised by real users, upgrade the honest-status section — or fix what they found and reply.
