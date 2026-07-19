@@ -1,6 +1,6 @@
 # Platform intake — <PLATFORM> (researched <DATE>, against <VERSION>)
 
-> Answer all 12 **in writing, from primary sources** (official schema, CLI changelog, one flagship plugin), before writing any glue. "Modeled on Claude Code" is not an answer — see the engram PR #8 story for what analogy ships.
+> Answer all 15 **in writing, from primary sources** (official schema, CLI changelog, one flagship plugin), before writing any glue. "Modeled on Claude Code" is not an answer — see the engram PR #8 story for what analogy ships.
 > When done, distill this into `docs/platforms/<platform>.md` and keep the source URLs.
 
 ## 1 · Manifest
@@ -58,6 +58,19 @@ How NOT to test the install: ·
 Marketplace / registry / git-url / manual? ·
 Who asked for this port (issue #): ·
 Who can verify live, if we can't: ·
+
+## 13 · Foreign-manifest compatibility
+Does this platform read another platform's manifest (a "bundle")? Which formats? ·
+If we ship several, **which marker wins** — and is that answer from the docs or the loader's code? ·
+Any key in that borrowed manifest that means something **different** here? ·
+
+## 14 · Global gates
+Per capability we contribute: does the host require a separate opt-in before it runs? ·
+The exact config key and the command that sets it (this becomes an install *step*): ·
+
+## 15 · What the diagnostics actually prove
+Does `list` / `inspect` / `status` reflect the running system, or only our manifest? ·
+The log line that proves our thing actually registered: ·
 
 ---
 

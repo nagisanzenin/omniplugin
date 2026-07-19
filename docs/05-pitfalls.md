@@ -70,6 +70,42 @@ Every entry: what actually happened → the rule it taught. All from [engram](ht
 
 **Rule:** port the prompt, adapt the trigger, preserve the guarantee — and verify the *invocation path*, not just the file format. ([02 · Portability rules](02-portability-rules.md) R6.)
 
+## 12 · The loader's code disagrees with the loader's docs
+
+**What happened:** OpenClaw's `plugins/bundles.md` states plainly that a native manifest wins detection — *"If a directory contains both, OpenClaw uses the native path."* The shipped `detectBundleManifestFormat` checks `.codex-plugin/plugin.json` **first** and only reaches `openclaw.plugin.json` fourth. engram ships a Codex manifest, so it is *always* a Codex bundle on OpenClaw regardless of what else it ships. A native `openclaw.plugin.json` was written, tested, observed to be completely inert, and deliberately **not** shipped — because the day upstream makes the code match the docs, that file would silently change the plugin's entire shape.
+
+**Rule:** for anything load-bearing, read the loader's **code**, not its prose — the docs describe intent, the code describes behavior. And when you find the two disagreeing, do not ship a file that is inert under today's behavior and load-bearing under tomorrow's. That is a landmine with a timer on it.
+
+## 13 · The same manifest key, different meaning on two platforms
+
+**What happened:** engram's Codex manifest declared `"hooks": "./hooks/hooks.json"`. On Codex that is a file path. On OpenClaw — which reads that same Codex manifest — the `hooks` value is a list of **directories to scan for hook packs**. So OpenClaw dutifully scanned a *JSON file* for `*/HOOK.md`, found nothing, and loaded no hooks at all. The fix was to **delete the key**: OpenAI documents that Codex auto-discovers `./hooks/hooks.json` when it is absent, and OpenClaw then falls back to scanning `./hooks/`. Both platforms found their hooks by convention once neither was being told anything.
+
+**Rule:** when platforms share a manifest, they share a **namespace, not a schema**. Check the semantics of every key against every platform that reads that file. And prefer convention to declaration: an omitted key that both platforms auto-discover correctly beats a declared one that means two different things.
+
+## 14 · Declared-and-broken looks exactly like working
+
+**What happened:** through all of the above, `openclaw plugins inspect engram` cheerfully listed `hooks` among the bundle's capabilities — because the capability probe only checks whether a `hooks/` path *exists*, not whether anything loaded from it. The diagnostic said "hooks ✓" for a plugin that was loading precisely zero.
+
+**Rule:** a capability listing is a statement about your manifest, not about the running system. **Assert the behavior, never the listing** — find the log line that proves the thing registered, or trigger it and observe the effect.
+
+## 15 · The feature gated behind a host flag your plugin cannot set
+
+**What happened:** OpenClaw skips internal hook discovery entirely until something opts in, and *shipping a hook pack inside a plugin does not opt in*. Without `openclaw config set hooks.internal.enabled true`, `openclaw hooks list` shows the hook as `✓ ready` — correct events, requirements satisfied, green tick — and it never runs once. Proven both directions in the loader log: zero handlers registered without the flag, `Registered hook: engram-due -> command:new, command:reset` with it.
+
+**Rule:** for every capability you contribute, find the host's **global enable gate** and put it in the install doc's numbered steps, not its troubleshooting section. A silent failure that renders as a green tick is the most expensive kind: users don't report it, because nothing looks wrong.
+
+## 16 · You tested the version the platform had cached, not the one you're shipping
+
+**What happened:** an agent dogfood was reported green. It had run against the agent definitions in the **platform's plugin cache** — four months and 83 commits stale, from a version whose assessor spec had neither of the two output rules the shipped spec enforces. The run "passed" while emitting a fabricated model id in a field the current spec explicitly forbids. Nothing looked wrong: clean prompt, plausible output, every field present. The only tell was a version number nobody printed.
+
+**Rule:** with N platforms you have **N independently drifting caches**. Any gate that runs *through* a platform tests whatever that platform cached; only gates that invoke your repo directly test what you're shipping. Print the loaded version before trusting a single result — and prefer driving agents by handing them the repo's file by absolute path.
+
+## 17 · Prose written for the platform you're porting is read by the ones you aren't
+
+**What happened:** the OpenClaw port wrote *"On OpenClaw, engram's agents are not registered — call `sessions_spawn`…"* into all three **shared** skills. Those files are read verbatim by six platforms. A blind read by an agent on Claude Code came back confused: the branch was posed as a choice between two platforms, Claude Code's own Task tool was never named, and the skills used bare agent names where that platform requires a namespaced type. Separately, a two-line engine-resolution snippet got **paraphrased into a guessed path** by a live model and broke `/review` — the variable it should have read was in the environment the whole time.
+
+**Rule:** in shared files, branch on **observable capability** (*"if your only mechanism is a generic `sessions_spawn`…"*), never on a platform name the reader has to recognise; and state the **property** (*"a fresh-context child running that agent's definition"*) so platform N+1 inherits it for free. For critical shell, ship **one copy-and-run block** and say `RUN THIS VERBATIM` — a base expression plus a correction line is an invitation to improvise. Both regressions were found by handing the edited files to an uncontaminated agent **on a different platform** and asking three questions: which mechanism applies to you, what does this block resolve to, and does anything here reference a tool you don't have?
+
 ---
 
 ## The meta-lesson

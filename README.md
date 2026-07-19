@@ -4,7 +4,7 @@
 
 Agentic platforms are multiplying — Claude Code, OpenAI Codex, OpenCode, Hermes, Antigravity, Gemini CLI, and next quarter's three new ones — and each has its own plugin format, discovery model, hook events, and marketplace. The naive answer is a port per platform, which turns every bug fix into N pull requests. The answer that works is the **omni-repo**: one repository whose portable core (Agent-Skills-standard `skills/` + a zero-dependency CLI engine + one state home) is shared verbatim, wrapped in the thinnest possible per-platform glue.
 
-This playbook is that pattern, extracted from a plugin that actually shipped it: [**engram**](https://github.com/nagisanzenin/engram) runs natively on **Claude Code, OpenAI Codex, OpenCode, and Hermes Agent, with Google Antigravity in review** — same skills, same engine, same user state, on all of them. Every rule in here carries a receipt: the real bug, review round, or user report that taught it. No rules without receipts.
+This playbook is that pattern, extracted from a plugin that actually shipped it: [**engram**](https://github.com/nagisanzenin/engram) runs natively on **Claude Code, OpenAI Codex, OpenCode, Hermes Agent, Google Antigravity, and OpenClaw** — same skills, same engine, same user state, on all six. The sixth is a chat gateway rather than a coding tool, which is the case that proved the pattern generalises past the terminal. Every rule in here carries a receipt: the real bug, review round, or user report that taught it. No rules without receipts.
 
 ## The doctrine, in ten lines
 
@@ -23,9 +23,9 @@ This playbook is that pattern, extracted from a plugin that actually shipped it:
 
 | Read | For |
 |---|---|
-| [docs/01-anatomy.md](docs/01-anatomy.md) | The omni-repo shape: core vs glue, the five-platform comparison table, the L0–L4 integration ladder |
+| [docs/01-anatomy.md](docs/01-anatomy.md) | The omni-repo shape: core vs glue, the six-platform comparison table, the L0–L4 integration ladder |
 | [docs/02-portability-rules.md](docs/02-portability-rules.md) | The ten engineering rules that make one repo run everywhere — each with code and its receipt |
-| [docs/03-adding-a-platform.md](docs/03-adding-a-platform.md) | **The checklist** — the recurring operation, phase by phase, with the 12 intake questions |
+| [docs/03-adding-a-platform.md](docs/03-adding-a-platform.md) | **The checklist** — the recurring operation, phase by phase, with the 15 intake questions |
 | [docs/04-maintenance.md](docs/04-maintenance.md) | Operating the matrix: the release protocol pattern, version-grep, honest status, community as your test fleet |
 | [docs/05-pitfalls.md](docs/05-pitfalls.md) | Field notes: eleven real failures → eleven rules |
 | [docs/platforms/](docs/platforms/) | Crib sheets: [Claude Code](docs/platforms/claude-code.md) · [Codex](docs/platforms/codex.md) · [OpenCode](docs/platforms/opencode.md) · [Hermes](docs/platforms/hermes.md) · [Antigravity](docs/platforms/antigravity.md) · [the wider landscape](docs/platforms/landscape.md) |
@@ -49,7 +49,7 @@ Honest status, per the playbook's own rule: **none of these routes is verified l
 
 ## The case study in one table
 
-engram v1.0.5, 2026-07-18 — what "one core, five platforms" concretely costs and buys:
+engram v1.0.8, 2026-07-19 — what "one core, six platforms" concretely costs and buys:
 
 | Platform | Glue that was needed | Rung |
 |---|---|---|
@@ -58,16 +58,17 @@ engram v1.0.5, 2026-07-18 — what "one core, five platforms" concretely costs a
 | OpenCode | the one real adapter: TS self-extract + config bridge + deterministic updater (88 tests) | L4 |
 | Hermes Agent | zero repo changes for skills (config entries) + one dual-mode hook variant | L3 (verified live, wire-level) |
 | Antigravity | a 3-line manifest — discovery does the rest | L1, in review |
+| OpenClaw | **zero new manifests** — it reads the Codex and Claude ones already there; one hook pack + one shared-doc page | L3 (skills, hook, and isolated-subagent grading verified live on 2026.7.1-2) |
 
 Shared and byte-identical across all five: `skills/`, `agents/*.md` (as prompt source), `scripts/engram.py` (214 selftest checks, same count everywhere), one state dir.
 
 ## Scope, honestly
 
-This is distilled from **one plugin shipping five platforms** (plus a researched survey of the rest of the landscape). It is a playbook, not a spec: platform loaders drift monthly, so every platform fact here is dated and versioned, and [CLAUDE.md](CLAUDE.md) tells future maintainers how to keep it true. When this playbook and a platform's current docs disagree, the platform docs win — then fix the playbook.
+This is distilled from **one plugin shipping six platforms** (plus a researched survey of the rest of the landscape). It is a playbook, not a spec: platform loaders drift monthly, so every platform fact here is dated and versioned, and [CLAUDE.md](CLAUDE.md) tells future maintainers how to keep it true. When this playbook and a platform's current docs disagree, the platform docs win — then fix the playbook.
 
 ## More from the same workshop
 
-- **[engram](https://github.com/nagisanzenin/engram)** — the reference omni-plugin: evidence-based learning with blind-graded recall and FSRS scheduling, on five platforms.
+- **[engram](https://github.com/nagisanzenin/engram)** — the reference omni-plugin: evidence-based learning with blind-graded recall and FSRS scheduling, on six platforms.
 - **[effortmining](https://github.com/nagisanzenin/effortmining)** · **[idiolect](https://github.com/nagisanzenin/idiolect)** · **[production-grade](https://github.com/nagisanzenin/claude-code-production-grade-plugin)** · **[less](https://github.com/nagisanzenin/less)** — Claude Code plugins sharing the same habit: deterministic cores, receipts, and honest numbers.
 
 ---

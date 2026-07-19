@@ -46,7 +46,7 @@ And where the platform calls the hook *per LLM call* instead of per session (Her
 Everything deterministic (state, dates, math, receipts) lives in one script with **no dependencies** and **no network code**, invoked as `python3 engine.py <cmd>`. Reasons, in order:
 
 1. **The shell is the only universal ABI.** No platform shares a plugin API; all of them can run a subprocess.
-2. **No install step means no per-platform install failures.** Four of engram's five platforms need zero `pip`/`npm` for the engine.
+2. **No install step means no per-platform install failures.** Five of engram's six platforms need zero `pip`/`npm` for the engine.
 3. **The trust story travels.** "Stdlib-only, zero network code, AST-verified by the selftest" is checkable on every platform identically — `python3 scripts/engine.py selftest` is the same 214 checks everywhere, and doubles as the universal install-verification command.
 
 Corollary: **never put user free-text on the command line.** Cross-platform means cross-shell; productions/goals reach the engine via file or stdin (`--file`, `--json -`), or a stray `'` or `$(…)` in user text becomes an injection hole on someone's machine.
