@@ -72,6 +72,15 @@ The exact config key and the command that sets it (this becomes an install *step
 Does `list` / `inspect` / `status` reflect the running system, or only our manifest? ·
 The log line that proves our thing actually registered: ·
 
+## 16 · Runtime & version lines
+What runtime does the platform's *current* release require, and what do users on older runtimes silently receive (`npm view <pkg> dist-tags` / `engines` — pitfall #20)? ·
+Which of those lines will we verify against — or all of them? ·
+
+## 17 · Parsers and lifecycle contracts
+Which of our declarative files does the host parse strictly, and what does a parse failure look like — error, or **silent absence** (pitfall #18)? ·
+Which lifecycle hooks does the host **await** (anything on the startup path must be fire-and-forget — pitfall #19)? ·
+Can we register a **mock model provider** (openai-compatible `baseUrl`)? If yes, payload capture makes the whole integration assertable without a live LLM — see the pi crib sheet's harness pattern. ·
+
 ---
 
 **Invariant mapping** (from [02 · Portability rules](../docs/02-portability-rules.md) R6): for each plugin invariant, the mechanism here — or the documented degradation:

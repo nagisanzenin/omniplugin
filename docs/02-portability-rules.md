@@ -17,7 +17,12 @@ ENGINE="${OPENCODE_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT:-${CODEX_PLUGIN_ROOT:-$PLUG
 
 Give users a manual override (`ENGRAM_ROOT`-style env var) as the last resort and the dev-clone path.
 
-**Receipt:** the Antigravity port (PR #8) survives *only* because of the landmark fallback — AG sets no root variable at all. The Hermes install exports `ENGRAM_ROOT` via `~/.hermes/.env` because Hermes loads that file into its process and terminal subprocesses inherit it.
+Two refinements the seventh platform earned:
+
+- **If the platform runs your code in-process, export the root var yourself.** Pi loads extensions into its own process, and both its exec API and its bash tool spawn children from `process.env` — so engram's pi extension sets `process.env.ENGRAM_ROOT` at load, and every shell the skills run inherits it. Zero skill changes; the OpenCode `shell.env` trick, generalized.
+- **Static install paths are pure fallbacks — order them LAST.** The waterfall also probes hardcoded install locations (`~/.openclaw/extensions/…`, `~/.pi/agent/git/…`) for sessions where no variable survived. A live pi session never needs its static entry (the env export wins earlier), but a user who installed on pi *and* uses Antigravity would have had the pi clone's engine silently shadow the Antigravity install when the pi path sat mid-list. Reviewers moved it to the end: a fallback that can never shadow another platform's resolution costs nothing; one that can is version skew waiting silently.
+
+**Receipt:** the Antigravity port (PR #8) survives *only* because of the landmark fallback — AG sets no root variable at all. The Hermes install exports `ENGRAM_ROOT` via `~/.hermes/.env` because Hermes loads that file into its process and terminal subprocesses inherit it. The pi ordering hazard was caught in engram v1.11.0's pre-release review (shipped reordered).
 
 ## R2 · Hooks self-resolve and degrade to silence
 
@@ -46,7 +51,7 @@ And where the platform calls the hook *per LLM call* instead of per session (Her
 Everything deterministic (state, dates, math, receipts) lives in one script with **no dependencies** and **no network code**, invoked as `python3 engine.py <cmd>`. Reasons, in order:
 
 1. **The shell is the only universal ABI.** No platform shares a plugin API; all of them can run a subprocess.
-2. **No install step means no per-platform install failures.** Five of engram's six platforms need zero `pip`/`npm` for the engine.
+2. **No install step means no per-platform install failures.** Six of engram's seven platforms need zero `pip`/`npm` for the engine.
 3. **The trust story travels.** "Stdlib-only, zero network code, AST-verified by the selftest" is checkable on every platform identically — `python3 scripts/engine.py selftest` is the same 214 checks everywhere, and doubles as the universal install-verification command.
 
 Corollary: **never put user free-text on the command line.** Cross-platform means cross-shell; productions/goals reach the engine via file or stdin (`--file`, `--json -`), or a stray `'` or `$(…)` in user text becomes an injection hole on someone's machine.
@@ -78,6 +83,8 @@ Your plugin's guarantees must survive porting; the mechanism that enforces them 
 | Codex | TOML agent port | **explicit**: `$engram-assessor, grade these: …` |
 | OpenCode | agent transformed at extract (`mode: subagent`) | platform routing |
 | Hermes | `delegate_task` — child starts with zero parent history | explicit, prompt file passed as `context` |
+| OpenClaw | `sessions_spawn` with `context: "isolated"` — clean child transcript | explicit, task text points at the agent file |
+| Pi | **a fresh `pi -p` process** (`--no-session --no-skills --no-context-files`, own-extension inert via env guard + `ctx.hasUI`) | explicit, bash tool spawns the child; receipt returns by file |
 
 The blindness is identical everywhere; only the trigger varies. When a platform can't host the mechanism at all, **degrade and say so** (Antigravity: assessor spawnability unverified → the README callout must carry the caveat, because the blind grading is load-bearing).
 
@@ -93,6 +100,8 @@ A plugin should improve the session **by being installed** — the slash command
 | OpenCode | `experimental.chat.system.transform` (+ `session.idle` toast for updates) |
 | Hermes | `pre_llm_call` hook, JSON-in/JSON-out, `{"context": "…"}` — or a **no-agent cron** delivering plain stdout to Telegram/Discord at zero LLM cost |
 | Antigravity | no session-start equivalent found (as of 2026-07-18) → shipped without, README says so |
+| OpenClaw | internal hook pack on `command:new`/`command:reset` — behind a **global enable flag** (`hooks.internal.enabled`), which belongs in the install steps (pitfall #15) |
+| Pi | extension: `session_start` fires a **fire-and-forget** probe (the host awaits these handlers — pitfall #19); `before_agent_start` injects the text as a user-role message with the first prompt; inert when `ctx.hasUI` is false or the child env guard is set |
 
 Two disciplines: the nudge is **silent unless useful** (prints nothing when nothing is due — "ambient, never nagging"), and its absence on a platform is a *documented caveat*, not a silent gap.
 

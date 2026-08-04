@@ -1,6 +1,6 @@
 # 04 · Maintaining the matrix
 
-Creating an omni-platform plugin is one afternoon per platform. *Maintaining* one is where the design either pays off or collapses. The operating doctrine, from a year of engram releases (v0.4 → v1.0.8, six platforms, ~20 releases):
+Creating an omni-platform plugin is one afternoon per platform. *Maintaining* one is where the design either pays off or collapses. The operating doctrine, from a year of engram releases (v0.4 → v1.11.1, seven platforms, ~25 releases):
 
 ---
 
@@ -28,6 +28,8 @@ Two rules that keep the list from growing unbounded:
 
 Each platform with its own registry or cache adds mandatory steps: npm publish + `npm view` verification for OpenCode (interactive — 2FA); `gh release create --latest` to flip the badge; and per-platform **update instructions in the release notes**, including cache gotchas ("a plain `plugin update` before `marketplace update` reports 'already current' against the stale cache").
 
+**And one receipt about the notes themselves:** release-notes generators trust heading boundaries. Engram's v1.11.0 CHANGELOG edit accidentally consumed the `## 1.10.1` heading beneath it — so the previous release's entire entry (including its gate claims: "nothing to audit", "§5.5/§5.7 not triggered") published *under the new version's header*, and the extraction script faithfully shipped all of it as v1.11.0's release notes. Caught only by the post-release review; fixed by restoring the header and editing the published notes. After generating notes, grep them for the **previous** version's title — if it's there, a heading got eaten.
+
 ## 2 · The README is a support matrix, and it drifts
 
 The front door is a table: platform / install commands / command spelling / status. Two disciplines:
@@ -52,7 +54,7 @@ Track the ladder rung per platform (L0–L4, [01 · Anatomy](01-anatomy.md)) and
 With N platforms you will not be able to run all N locally. Structure for that:
 
 - **Issues are the demand signal** (Phase 0) and the verification channel ("if anything misbehaves, open an issue with what you see" — in every install doc).
-- **Contributors port; the maintainer re-researches the loader.** Two of engram's six platforms arrived as external PRs. The maintainer's review job is Phase-1 research against primary sources — the OpenCode PR hardened across four review rounds; the AG review *removed* most of the contribution and cited the official schema, the CLI changelog, and a flagship plugin for every requested change.
+- **Contributors port; the maintainer re-researches the loader.** Two of engram's seven platforms arrived as external PRs, and two more (OpenClaw, Pi) began as user issues. The maintainer's review job is Phase-1 research against primary sources — the OpenCode PR hardened across four review rounds; the AG review *removed* most of the contribution and cited the official schema, the CLI changelog, and a flagship plugin for every requested change.
 - **Close the loop with strangers.** After resolving an external issue/PR: thank them, state what shipped and how to get it, name what's still unverified and how they can help. This is how a requester becomes your standing test environment for a platform you'll never install.
 
 ## 6 · Watch for platform drift

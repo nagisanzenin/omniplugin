@@ -13,7 +13,7 @@ You have the omni-platform plugin playbook staged alongside this skill. Your job
 OMNI="${CLAUDE_PLUGIN_ROOT:-${CODEX_PLUGIN_ROOT:-${OMNIPLUGIN_ROOT:-}}}"
 ```
 
-If unset (Antigravity and Hermes set no root variable), resolve the landmark: the directory containing `.claude-plugin/plugin.json` two levels up from this skill file (`skills/omniplugin/SKILL.md` → repo root). Dev clones: `~/Documents/Github/omniplugin` or wherever the repo was cloned.
+If unset (Antigravity, Hermes, and Pi set no root variable), resolve the landmark: the directory containing `.claude-plugin/plugin.json` two levels up from this skill file (`skills/omniplugin/SKILL.md` → repo root). Pi installs stage the whole repo at `~/.pi/agent/git/github.com/nagisanzenin/omniplugin`. Dev clones: `~/Documents/Github/omniplugin` or wherever the repo was cloned.
 
 ## 1 · Route by task
 

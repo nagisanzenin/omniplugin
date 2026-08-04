@@ -106,6 +106,30 @@ Every entry: what actually happened → the rule it taught. All from [engram](ht
 
 **Rule:** in shared files, branch on **observable capability** (*"if your only mechanism is a generic `sessions_spawn`…"*), never on a platform name the reader has to recognise; and state the **property** (*"a fresh-context child running that agent's definition"*) so platform N+1 inherits it for free. For critical shell, ship **one copy-and-run block** and say `RUN THIS VERBATIM` — a base expression plus a correction line is an invitation to improvise. Both regressions were found by handing the edited files to an uncontaminated agent **on a different platform** and asking three questions: which mechanism applies to you, what does this block resolve to, and does anything here reference a tool you don't have?
 
+## 18 · The strict parser that skips silently
+
+**What happened:** pi parses prompt-template frontmatter as real YAML. Engram's `/learn` template carried `description: Engram — learn any topic properly: first-principles curriculum…` — an unquoted value with a second colon, which is invalid YAML. Pi's response was not an error: the template **silently didn't load**, so `/learn kalman filters` reached the model as literal text, on two pi versions, and the hunt went through pi's resource-loader source twice before the difference turned out to be a colon. The debugging cost an hour; the fix was quotation marks. (engram v1.11.0 development, caught by the port's own harness failing exactly one check.)
+
+**Rule:** every declarative file you ship is parsed by *someone's* parser, and the strict ones fail as **absence, not error** — the quieter cousin of namespace bleed. Quote frontmatter values everywhere, and make your verification harness invoke each command once: a parse failure that renders as "command not found by the model" is invisible to any check that only lists files.
+
+## 19 · The lifecycle hook the host awaits
+
+**What happened:** engram's pi extension ran its session-start probe (`engram.py session-start`, a subprocess) with `await` inside the `session_start` handler. Pi **awaits all `session_start` handlers before rendering the TUI and before completing `/new` and `/resume`** — so a slow engine (cold network home dir, macOS's python3 installer stub) would have frozen the entire agent's startup for the full 15-second timeout, unattributed. Found by an adversarial reviewer reading pi's runner source, not by any test — the harness's engine was always fast. A sibling in the same review: pi's exec resolves a **timed-out, signal-killed child as `code: 0`** with a separate `killed: true` flag, so the "success" guard would have injected a truncated nudge fragment under `PYTHONUNBUFFERED=1`.
+
+**Rule:** before putting work in a host's lifecycle hook, find out whether the host **awaits it** — an awaited handler is on the startup critical path, so fire-and-forget anything that touches disk or subprocesses. And read the exec contract to its edges: what does a *killed* child return? The flattering interpretation of an exit code is exactly the one to distrust.
+
+## 20 · The dist-tag that downgrades silently
+
+**What happened:** `npm install -g` of pi on a Node 20 machine installed **0.74.2** while `latest` was 0.83.0 — nine minor versions of skew, no warning. Pi gates current releases on Node ≥ 22.19 and publishes a `legacy-node20` dist-tag for older runtimes; npm resolves it silently. Half a day of source-reading targeted the wrong version's code, and any user following the install doc on Node 20 gets a different binary than the one you verified.
+
+**Rule:** before writing a requirements line, run `npm view <pkg> dist-tags` and `npm view <pkg> engines` — a platform with engine-gated releases has **multiple lines your users actually receive**. Verify your plugin against every line users get by default, or name the one you verified. (Engram's answer: the harness runs green on both, and the install doc says so.)
+
+## 21 · The check that cannot fail for the documented reason
+
+**What happened:** engram's pi harness asserted "no nudge on an empty store" — in print mode, where the extension is **inert regardless of the store** (`ctx.hasUI` is false in `-p`). The check could never fail for the reason the docs implied it guarded; store-driven silence was proven by zero of the checks while two documents cited it as verified. The same review round found the docs saying "asserted" where the harness merely `console.log`ged (a context-file canary, a notify request). Both fixed in the honest direction — observations promoted to checks (16 → 19 → 20) rather than sentences softened. Caught pre-release by a reviewer diffing *claims against assertions*, and post-release by §7.5 for the empty-store case. (engram v1.11.0 → v1.11.1.)
+
+**Rule:** a check is only evidence if it *can* fail for the documented reason — know which mode, flags, and guards are active when it runs, or you are asserting your test setup, not your feature. And audit the words "asserted"/"verified" in your docs against the instrument: every one must trace to a check that would go red, not to a log line somebody once read.
+
 ---
 
 ## The meta-lesson
