@@ -28,7 +28,7 @@ This playbook is that pattern, extracted from a plugin that actually shipped it:
 | [docs/03-adding-a-platform.md](docs/03-adding-a-platform.md) | **The checklist** — the recurring operation, phase by phase, with the 17 intake questions |
 | [docs/04-maintenance.md](docs/04-maintenance.md) | Operating the matrix: the release protocol pattern, version-grep, honest status, community as your test fleet |
 | [docs/05-pitfalls.md](docs/05-pitfalls.md) | Field notes: twenty-one real failures → twenty-one rules |
-| [docs/platforms/](docs/platforms/) | Crib sheets: [Claude Code](docs/platforms/claude-code.md) · [Codex](docs/platforms/codex.md) · [OpenCode](docs/platforms/opencode.md) · [Hermes](docs/platforms/hermes.md) · [Antigravity](docs/platforms/antigravity.md) · [Pi](docs/platforms/pi.md) · [the wider landscape](docs/platforms/landscape.md) |
+| [docs/platforms/](docs/platforms/) | Crib sheets: [Claude Code](docs/platforms/claude-code.md) · [Codex](docs/platforms/codex.md) · [OpenCode](docs/platforms/opencode.md) · [Hermes](docs/platforms/hermes.md) · [Antigravity](docs/platforms/antigravity.md) · [OpenClaw](docs/platforms/openclaw.md) · [Pi](docs/platforms/pi.md) · [the wider landscape](docs/platforms/landscape.md) |
 | [templates/](templates/) | [platform-intake.md](templates/platform-intake.md) (the 17 questions) · [INSTALL-PLATFORM.md](templates/INSTALL-PLATFORM.md) (install-doc skeleton) · [session-hook.sh](templates/session-hook.sh) (the reference ambient hook) |
 
 Working with an agent? Point it at [CLAUDE.md](CLAUDE.md) — it routes by task.
