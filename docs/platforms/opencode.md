@@ -33,6 +33,16 @@ OpenCode plugins are npm packages (TypeScript, `@opencode-ai/plugin`), loaded fr
 - **npm publish is a release step** (§6.5 in engram's protocol): skipping it strands npm installers on the old version *and* silently mutes their update notifications (the update manifest diffs against the npm cache). `npm pack --dry-run` first — npm has no gitignore; `__pycache__` will ship. Publishing needs interactive 2FA.
 - Adapter code = product code: engram's carries 88 vitest tests + `tsc --noEmit` + engine selftest in CI on every push.
 
+## OpenCode 2.0 (beta) — new plugin contract (verified 2026-08-16, opencode2 v0.0.0-next-17444)
+
+V2 does not load V1 plugins. Facts from the shipped binary's source maps + a live e2e (engram branch `opencode-v2`, issue #18):
+
+- **Contract:** default export `{ id, setup(ctx) }`. `Plugin.define` is identity — a plain object loads, extra keys tolerated. Ship the adapter with ZERO `@opencode-ai/*` imports and it survives the beta's export reshuffles (V1 API moved to `/v1`, promise-V2 became the root, Aug-14 builds).
+- **Dual-entry trick:** V2's npm resolution probes package subpath `"server"` before the root (`subpaths: ["server", ""]`). Publish `exports["./server"] = <v2 entry>` and ONE package name installs the right adapter on both engines. Local dirs only follow string `exports`/`module`/`main` — local dev must point at the entry file.
+- **THE trap:** plugins run in a background service shared across projects — `process.cwd()` is NOT the workspace. Plugins instantiate per workspace; every domain response is `{ location: {directory, ...}, data }` — read the dir from `await ctx.agent.list()`. Engram's first smoke test extracted into `~/.config/opencode/` because of this.
+- **Bridge replacement:** extract to disk, then `ctx.{command,skill,agent}.reload()` — re-scans disk, surfaces live in the same boot. Discovery dirs went plural (`commands/`, `agents/`; singulars remain as compat shims — write plurals). Hooks map: `system.transform` → `session.hook("context")` (push `{type:"text", text}` SystemParts), `shell.env` → `shell.hook("create.before")`, custom tools → `tool.transform(d => d.add(...))` (plain JSON Schema input ok). No toast API. Duplicate plugin ids across sources kill the whole activation — never double-install.
+- Full port receipts: engram `INSTALL-OPENCODE-V2.md` + `.opencode/v2.ts` on the `opencode-v2` branch.
+
 ## Sources
 
 - Engram's adapter: https://github.com/nagisanzenin/engram/tree/main/.opencode (heavily commented headers — read `index.ts` and `install.ts` first)
