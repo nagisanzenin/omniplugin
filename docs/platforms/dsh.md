@@ -44,10 +44,14 @@ the composed tree.
   prose. Model gesture: a `skill` loader tool + `<available_skills>` catalog.
 - **Instructions**: AGENTS.md + CLAUDE.md, project + user-global `~/.dsh/AGENTS.md`,
   `.local` overlays.
-- **Subagents**: tool-subagent + in-process spawn/fork drivers (also claude-code/codex
-  DRIVERS — dsh can drive other CLIs as subagents). Custom agent-preset registration
-  exists (`apps/cli/config/agent-presets`); external plugins' agents unregistered by
-  default — construct-isolation-yourself route applies.
+- **Subagents**: TWO default tools and the choice is load-bearing — `subagent` (fresh
+  context, "does not see this conversation") vs **`subagent_fork` (seeds the child with
+  the whole conversation — silently breaks any blind-grader invariant; forbid it
+  explicitly in your skill prose)**. Also claude-code/codex DRIVERS. External plugins'
+  agents unregistered by default — construct-isolation-yourself route applies.
+- **Version pinning discipline**: the harness and its plugin packages version
+  independently (dsh 0.1.0-rc.6 shipped beside bridge 0.0.1-rc.5) — pin and NAME both in
+  docs; engram's §7.5 caught the two conflated into one number that was never run.
 - **Env**: shell-env plugin manages `DSH_*` keys only (contributor API); no plugin-root
   var for foreign plugins — use a static waterfall path (`~/.agents/<name>` convention).
 - **Sandbox**: `DSH_PERMISSION_MODE` default `workspace-write`; writes outside the
